@@ -1,5 +1,6 @@
 CFLAGS = -Ignu-efi/inc -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
 LDFLAGS = -shared -Bsymbolic -Lgnu-efi/x86_64/lib -Lgnu-efi/x86_64/gnuefi -Tgnu-efi/gnuefi/elf_x86_64_efi.lds gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o
+CFILES = $(shell find src/ -name "*.c")
 KERNEL_FILE = base/kernel.sys
 OUTPUT_IMG = Divine.img
 
@@ -25,9 +26,11 @@ link: buildc
 	ld *.o $(LDFLAGS) -lgnuefi -lefi -o main.so
 
 .PHONY: buildc
-buildc:
+buildc: $(CFILES)
+	@ git submodule init
+	@ git submodule update
 	cd gnu-efi; make
-	gcc $(CFLAGS) -c $$(find src/ -name "*.c") -o main.o
+	gcc $(CFLAGS) -c $^
 
 .PHONY: run
 run:
